@@ -3,8 +3,7 @@ import pandas as pd
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import json
-##  pip install dash-defer-js-import
-# import dash_defer_js_import as ddji
+
 
 draw_function = '''
 function drawGraph(graphData) {
@@ -88,9 +87,9 @@ links = []
 for idx, row in weighted_product_facts_df_graph.head(10).iterrows():
     source_node = row['asin.original']
     target_node = row['data_label']
-    nodes.append({'id': source_node, 'label': source_node, 'color': 'grey', 'type': 'Product'})
-    nodes.append({'id': target_node, 'label': target_node, 'color': 'green', 'type': 'Fact'})
-    links.append({'source': source_node, 'target': target_node, 'rating': int(row['weighted_rating'])})
+    nodes.append({'id': source_node, 'label': source_node})
+    nodes.append({'id': target_node, 'label': target_node})
+    links.append({'source': source_node, 'target': target_node})
 
 # Remove duplicate nodes
 nodes = list({node['id']: node for node in nodes}.values())
