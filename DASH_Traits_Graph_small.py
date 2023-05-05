@@ -5,8 +5,37 @@ from dash.dependencies import Input, Output, State
 import json
 
 
+
+# Load the data
+weighted_product_facts_df_graph = pd.read_csv('weighted_product_facts_df_graph.csv')
+
+# Create the nodes and links of the graph
+nodes = []
+links = []
+
+# Add nodes and links for weighted_product_facts_df_graph
+for idx, row in weighted_product_facts_df_graph.head(10).iterrows():
+    source_node = row['asin.original']
+    target_node = row['data_label']
+    nodes.append({'id': source_node, 'label': source_node})
+    nodes.append({'id': target_node, 'label': target_node})
+    links.append({'source': source_node, 'target': target_node})
+
+# Remove duplicate nodes
+nodes = list({node['id']: node for node in nodes}.values())
+
+
+graph_data = {
+    'nodes': nodes,
+    'links': links
+}
+
+
+
+
 draw_function = '''
-function drawGraph(graphData) {
+function drawGraph() {
+       graphData = ''' + json.dumps(graph_data) + '''
     console.log('drawGraph called with data:', graphData);
     // Load D3 library
     const d3 = window.d3;
@@ -76,52 +105,19 @@ function drawGraph(graphData) {
 '''
 
 
-# Load the data
-weighted_product_facts_df_graph = pd.read_csv('weighted_product_facts_df_graph.csv')
-
-# Create the nodes and links of the graph
-nodes = []
-links = []
-
-# Add nodes and links for weighted_product_facts_df_graph
-for idx, row in weighted_product_facts_df_graph.head(10).iterrows():
-    source_node = row['asin.original']
-    target_node = row['data_label']
-    nodes.append({'id': source_node, 'label': source_node})
-    nodes.append({'id': target_node, 'label': target_node})
-    links.append({'source': source_node, 'target': target_node})
-
-# Remove duplicate nodes
-nodes = list({node['id']: node for node in nodes}.values())
-
-
-graph_data = {
-    'nodes': nodes,
-    'links': links
-}
-
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
     html.Div(id='graph-container', style={'width': '100%', 'height': '500px'}),
     html.Script(src='https://d3js.org/d3.v5.min.js'),
     html.Script(draw_function),
-    dcc.Store(id='graph-data', data=json.dumps(graph_data)),
     dcc.Interval(id='draw-graph-interval', interval=6000, n_intervals=0)
 ])
  
 @app.callback(Output('graph-container', 'children'),
-              Input('graph-data', 'data'),
               Input('draw-graph-interval', 'n_intervals'))
-def draw_graph(graph_data, n_intervals):
-    if graph_data is not None:
-        graph_data = json.loads(graph_data)
-        # Write graph data to JSON file
-        with open('graph_data.json', 'w') as f:
-            json.dump(graph_data, f)
-        return html.Script('drawGraph(' + json.dumps(graph_data) + ');')
-    else:
-        return html.Div('No Data Available', style={'fontSize': '24px', 'textAlign': 'center'})
+def draw_graph(n_intervals):
+    return html.Script('drawGraph();')
 
 if __name__ == '__main__':
     app.run_server(debug=True, port = 8070)
