@@ -13,7 +13,7 @@ nodes = []
 links = []
 
 # Add nodes and links for weighted_product_facts_df_graph
-for idx, row in weighted_product_facts_df_graph.head(10).iterrows():
+for idx, row in weighted_product_facts_df_graph.iterrows():
     source_node = row['asin.original']
     target_node = row['data_label']
     nodes.append({'id': source_node, 'label': source_node})
@@ -35,8 +35,6 @@ app.layout = html.Div([
     html.Script(src='https://d3js.org/d3.v5.min.js'),
     html.Div(id='graph-container', style={'width': '100%', 'height': '500px'}),
     html.Div(id='code'),
-    
-    #html.Script(draw_function),
     dcc.Store(id='graph-data', data=json.dumps(graph_data)),
     dcc.Interval(id='draw-graph-interval', interval=6000, n_intervals=0)
 ])
